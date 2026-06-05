@@ -22,7 +22,7 @@ ChatGPT 不再只在你說「記住這件事」時才記得你。Dreaming 用一
 - 🌗 **深色 / 淺色** — 午夜夢境(dark)與晨曦薰衣草(light)兩套配色,記憶你的選擇
 - 🧭 **多頁面 + 跨頁導覽** — 9 頁各有獨立 URL,語言與主題跨頁持久
 - 📊 **多種視圖** — 總覽、運作原理(長文)、時間軸、核心能力(便當格)、效能儀表板、推出分級(比較表)、隱私看板、FAQ
-- 📈 **純手寫 SVG 圖表** — 記憶準確率三代演進長條圖 + 趨勢折線,無圖表函式庫
+- 🧱 **多版型引擎** — hub / 長文 / 時間軸 / 便當格 / 儀表板 / 比較表 / 看板 / FAQ,純 vanilla JS、無框架
 - 🔍 **FAQ 即時搜尋** — 輸入關鍵字即時過濾問答
 - 🌌 **夢境氛圍** — Fraunces 襯線標題、緩慢飄移的極光背景、柔和紫光點綴
 - 📱 **響應式** — 手機 / 平板 / 桌機皆適配(375px 無水平溢出)
@@ -32,7 +32,7 @@ ChatGPT 不再只在你說「記住這件事」時才記得你。Dreaming 用一
 
 ## 📂 內容結構 / 資料來源
 
-本站內容整理自 **OpenAI〈Dreaming: Better memory for a more helpful ChatGPT〉(2026/6/4)** 及後續外媒報導(digit.in、findskill.ai、techtimes.com、dataconomy.com、cryptonomist.ch)。
+本站內容整理自 **OpenAI〈Dreaming: Better memory for a more helpful ChatGPT〉(2026/6/4)公告全文**;記憶控制操作以官方 Memory FAQ 為準。
 
 ```
 dreaming-chatgpt-better-memory/
@@ -40,7 +40,7 @@ dreaming-chatgpt-better-memory/
 ├── overview.html       # 運作原理(長文)
 ├── timeline.html       # 三代演進(時間軸)
 ├── capabilities.html   # 核心能力(便當格)
-├── benchmarks.html     # 效能數據(儀表板 + 圖表)
+├── benchmarks.html     # 如何評估(儀表板:三面向 × 三世代對照)
 ├── controls.html       # 記憶控制(長文)
 ├── rollout.html        # 推出與分級(比較表)
 ├── privacy.html        # 隱私與風險(看板)
@@ -54,7 +54,7 @@ dreaming-chatgpt-better-memory/
 └── .nojekyll
 ```
 
-> ⚠️ **非官方**:本網站為個人整理之非官方資源。**效能數字(如記憶準確率 82.8%)為 OpenAI 內部自評、由外媒引述,未經獨立第三方驗證**;部分隱私 / 安全項目為第三方研究或報導(已於頁面標註)。如有錯誤或出入,請以 [OpenAI 官方頁面](https://openai.com/index/chatgpt-memory-dreaming/) 為準。
+> ⚠️ **非官方**:本網站為個人整理之非官方資源。**OpenAI 的評測以圖表呈現、未在文中公布可引用的百分比,因此本站不杜撰任何數字**;原文唯一的具體數字為「服務免費版算力約降低 5×」。「隱私與風險」頁為一般延伸脈絡,非公告內容。如有出入,請以 [OpenAI 官方頁面](https://openai.com/index/chatgpt-memory-dreaming/) 與官方 Memory FAQ 為準。
 
 ---
 
