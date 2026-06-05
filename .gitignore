@@ -1,0 +1,5 @@
+# Local source material & scratch (never deploy)
+tmp/
+.shots/
+*.log
+.DS_Store
