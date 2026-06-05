@@ -435,6 +435,28 @@ body::before {
 /* ---- Focus visibility on the new palette ---- */
 .search:focus { outline-color:var(--primary); }
 
+/* ---- GitHub star button (appbar, top-right) ---- */
+.gh-star {
+  display:inline-flex; align-items:center; gap:7px; padding:7px 12px; flex:0 0 auto;
+  border-radius:var(--radius-lg); border:1px solid var(--outline-variant);
+  background:color-mix(in srgb,var(--surface-container) 70%,transparent);
+  color:var(--on-surface); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer;
+  transition:background .15s,border-color .15s,box-shadow .15s,transform .15s;
+}
+.gh-star:hover, .gh-star:focus-visible {
+  background:var(--surface-container-high);
+  border-color:color-mix(in srgb,var(--primary) 45%,transparent);
+  box-shadow:0 8px 22px -10px color-mix(in srgb,var(--primary) 70%,transparent);
+  transform:translateY(-1px); outline:none;
+}
+.gh-star__logo { fill:currentColor; flex:0 0 auto; opacity:.92; }
+.gh-star__count { font-variant-numeric:tabular-nums; color:var(--on-surface-variant); padding-left:2px; min-width:1ch; }
+.gh-star__count:empty { display:none; }
+@media (max-width:480px) {
+  .gh-star__label { display:none; }
+  .gh-star { padding:7px 10px; }
+}
+
 /* ---- Honour reduced motion for the new animation ---- */
 @media (prefers-reduced-motion:reduce) {
   body::before { animation:none !important; }

@@ -22,10 +22,11 @@
 
 window.SITE_META = {
   title:    { en: "ChatGPT Dreaming", zh: "ChatGPT 做夢記憶" },
+  repo:     "tingwei161803/dreaming-chatgpt-better-memory",
   subtitle: { en: "How ChatGPT's new “dreaming” memory works — an unofficial bilingual digest.",
               zh: "ChatGPT 全新「做夢(dreaming)」記憶系統如何運作——非官方中英雙語整理。" },
-  footer:   { en: "Unofficial digest · not affiliated with OpenAI · built with lazy-data2web. Primary source: OpenAI, “Dreaming: Better memory for a more helpful ChatGPT” (Jun 4 2026). OpenAI's eval charts publish no citable numbers, so none are invented here; privacy items are general context, not from the announcement.",
-              zh: "非官方整理 · 與 OpenAI 無關 · 使用 lazy-data2web 建置。主要來源:OpenAI〈Dreaming: Better memory for a more helpful ChatGPT〉(2026/6/4)。原文評測以圖表呈現、未公布可引用數值,本站不杜撰數字;隱私章節為一般延伸脈絡,非公告內容。" }
+  footer:   { en: "Unofficial digest · not affiliated with OpenAI. Primary source: OpenAI, “Dreaming: Better memory for a more helpful ChatGPT” (Jun 4 2026). OpenAI's eval charts publish no citable numbers, so none are invented here; privacy items are general context, not from the announcement.",
+              zh: "非官方整理 · 與 OpenAI 無關。主要來源:OpenAI〈Dreaming: Better memory for a more helpful ChatGPT〉(2026/6/4)。原文評測以圖表呈現、未公布可引用數值,本站不杜撰數字;隱私章節為一般延伸脈絡,非公告內容。" }
 };
 
 window.SITE_PAGES = [
