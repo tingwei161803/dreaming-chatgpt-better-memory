@@ -10,7 +10,7 @@ ChatGPT 不再只在你說「記住這件事」時才記得你。Dreaming 用一
 
 | | |
 |---|---|
-| 🌐 網站 | <https://tingwei161803.github.io/dreaming-chatgpt-better-memory/> |
+| 🌐 網站 | <https://dreaming-chatgpt-better-memory.peteraim.com/> |
 
 > 直接點進去就能用,無需安裝。每一頁都有獨立網址,可單獨分享(例如 `…/benchmarks.html`、`…/privacy.html`)。
 
