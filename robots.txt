@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dreaming-chatgpt-better-memory.peteraim.com/sitemap.xml

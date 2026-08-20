@@ -75,12 +75,9 @@ uv run python -m http.server 4173
 
 > 本專案為純靜態網站,不需安裝任何依賴。若要跑本機伺服器或測試,依偏好一律使用 `uv`。
 
-### 測試(選配)
+### 驗證(選配)
 
-```bash
-uv run --with playwright playwright install chromium      # 首次
-uv run --with playwright python <lazy-data2web>/scripts/verify.py --dir .
-```
+本機起服務後,可用瀏覽器開發者工具逐頁檢查 `<title>`、canonical、GA4 追蹤碼是否正確,並確認跨頁導覽、語言 / 主題切換、小螢幕(375px)下沒有橫向捲動。
 
 ---
 
