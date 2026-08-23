@@ -5,6 +5,9 @@
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/</loc>
+  </url>
+  <url>
     <loc>https://dreaming-chatgpt-better-memory.peteraim.com/benchmarks.html</loc>
   </url>
   <url>
@@ -14,10 +17,34 @@
     <loc>https://dreaming-chatgpt-better-memory.peteraim.com/controls.html</loc>
   </url>
   <url>
-    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/faq.html</loc>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/</loc>
   </url>
   <url>
-    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/</loc>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/benchmarks.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/capabilities.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/controls.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/faq.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/overview.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/privacy.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/rollout.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/en/timeline.html</loc>
+  </url>
+  <url>
+    <loc>https://dreaming-chatgpt-better-memory.peteraim.com/faq.html</loc>
   </url>
   <url>
     <loc>https://dreaming-chatgpt-better-memory.peteraim.com/overview.html</loc>
