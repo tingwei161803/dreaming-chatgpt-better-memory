@@ -6,8 +6,11 @@
 
      1. reads the current page from <body data-page="..."> (via LDW),
      2. picks a renderer from RENDERERS by that page's `layout`,
-     3. paints it into <main id="page"> and wires its interactions,
-     4. registers an onLang() callback so a language switch repaints the body.
+     3. paints it into <main id="page"> and wires its interactions.
+
+   It paints in the page's language, which shell.js takes from <html lang> —
+   Chinese at the root, English under /en/. Switching language is a navigation
+   to the twin page, not a repaint.
 
    RENDERERS is the LAYOUT REGISTRY — one entry per supported page layout:
      hub | gallery | article | dashboard | timeline | table |
@@ -634,7 +637,7 @@
     }
 
     /* =====================================================================
-       RENDER the current page; re-runnable on language switch
+       RENDER the current page
        ===================================================================== */
     function render() {
       teardowns.forEach(function (fn) { try { fn(); } catch (e) {} });
@@ -648,7 +651,6 @@
       if (w) w(p);
     }
 
-    L.onLang(render);
     render();
   }
 

@@ -6,15 +6,17 @@
    tiny toolkit on window.LDW that each page's app.js reuses.
 
    Loaded on EVERY page BEFORE app.js. It:
-     1. reads persisted lang/theme (localStorage, sandbox-safe),
+     1. reads the page's language from <html lang> and the theme from
+        localStorage (sandbox-safe),
      2. injects app bar + nav + footer + dialog around <main id="page">,
-     3. wires the language / theme toggles,
-     4. highlights the current page (from <body data-page="...">),
-     5. lets app.js register an onLang() callback so a language switch repaints
-        BOTH the chrome AND the page body — nothing is ever left in one language.
+     3. wires the theme toggle and points the language link at this same page
+        in the other language,
+     4. highlights the current page (from <body data-page="...">).
 
-   Cross-page persistence is automatic: lang/theme live in localStorage (an
-   origin-wide store), so navigating to another .html restores the same state.
+   Language comes from the URL: Chinese at the root, English under /en/.
+   A page never switches language in place, so visitors and crawlers alike get
+   exactly the language its URL promises. Theme still lives in localStorage (an
+   origin-wide store), so navigating to another .html restores it.
    ========================================================================= */
 (function () {
   "use strict";
@@ -32,9 +34,30 @@
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
 
+  /* ---------- language: decided by the URL, never by localStorage ----------
+     Chinese lives at the root, English under /en/, and every page declares
+     which one it is in <html lang>. Reading it back from storage would mean the
+     same URL shows different languages to different visitors — and crawlers,
+     which have no storage at all, would only ever see the default. */
+  var TWIN_DIR = "/en";
+  var LANG_CODE = { en: "en", zh: "zh-Hant" };
+
+  function docLang() {
+    var declared = (document.documentElement.getAttribute("lang") || "en").toLowerCase();
+    return declared.indexOf("zh") === 0 ? "zh" : "en";
+  }
+  /* this same page in the other language */
+  function otherLangHref() {
+    var p = location.pathname;
+    if (p === TWIN_DIR || p.indexOf(TWIN_DIR + "/") === 0) {
+      return p.slice(TWIN_DIR.length) || "/";
+    }
+    return TWIN_DIR + p;
+  }
+
   /* ---------- global state ---------- */
   var state = {
-    lang:  lsGet("lang")  || "en",
+    lang:  docLang(),
     theme: lsGet("theme") || "light"
   };
 
@@ -59,10 +82,6 @@
     for (var i = 0; i < PAGES.length; i++) if (PAGES[i].slug === slug) return PAGES[i];
     return PAGES[0] || null;
   }
-
-  /* ---------- onLang callback registry (app.js plugs in here) ---------- */
-  var langSubscribers = [];
-  function onLang(fn) { if (typeof fn === "function") langSubscribers.push(fn); }
 
   /* =======================================================================
      CHROME INJECTION — app bar, nav, footer, dialog around <main id="page">
@@ -92,6 +111,19 @@
           '<span class="gh-star__count" id="ghStarCount"></span>' +
         '</a>'
       : "";
+    /* language switch — a real link to this same page in the other language, so
+       it works without JavaScript and gives crawlers a path to follow. It names
+       where it goes, not where you are. */
+    var to = state.lang === "en" ? "zh" : "en";
+    var langHtml =
+      '<a class="icon-btn" id="langToggle" href="' + otherLangHref() + '"' +
+          ' rel="alternate" hreflang="' + LANG_CODE[to] + '" title="Language / 語言"' +
+          ' aria-label="' + (to === "zh" ? "切換到中文版" : "Switch to English") + '">' +
+        '<span class="material-symbols-rounded" aria-hidden="true">translate</span>' +
+        '<span class="icon-btn__txt" id="langLabel" lang="' + LANG_CODE[to] + '">' +
+          (to === "zh" ? "中" : "EN") +
+        '</span>' +
+      '</a>';
     appbar.innerHTML =
       '<div class="appbar__inner">' +
         '<a class="brand" href="index.html">' +
@@ -100,10 +132,7 @@
         '</a>' +
         '<div class="appbar__actions">' +
           starHtml +
-          '<button class="icon-btn" id="langToggle" type="button" title="Language" aria-label="Toggle language / 切換語言">' +
-            '<span class="material-symbols-rounded">translate</span>' +
-            '<span class="icon-btn__txt" id="langLabel">中</span>' +
-          '</button>' +
+          langHtml +
           '<button class="icon-btn" id="themeToggle" type="button" title="Theme" aria-label="Toggle theme / 切換主題">' +
             '<span class="material-symbols-rounded" id="themeIcon">dark_mode</span>' +
           '</button>' +
@@ -179,7 +208,6 @@
 
   /* ---------- chrome text in the active language ---------- */
   function refreshChrome() {
-    document.documentElement.setAttribute("lang", state.lang);
     var page = currentPage();
     var siteTitle = t(META.title);
     var pageTitle = page ? t(page.title) : "";
@@ -207,22 +235,10 @@
     if (icon) icon.textContent = state.theme === "dark" ? "light_mode" : "dark_mode";
     lsSet("theme", state.theme);
   }
-  function applyLangChrome() {
-    var label = document.getElementById("langLabel");
-    if (label) label.textContent = state.lang === "en" ? "EN" : "中";
-    lsSet("lang", state.lang);
-  }
-
   function wire() {
     document.getElementById("themeToggle").addEventListener("click", function () {
       state.theme = state.theme === "dark" ? "light" : "dark";
       applyTheme();
-    });
-    document.getElementById("langToggle").addEventListener("click", function () {
-      state.lang = state.lang === "en" ? "zh" : "en";
-      applyLangChrome();
-      refreshChrome();
-      langSubscribers.forEach(function (fn) { try { fn(state.lang); } catch (e) {} });
     });
   }
 
@@ -236,7 +252,6 @@
     lsGet: lsGet, lsSet: lsSet,
     pages: PAGES, meta: META,
     currentPage: currentPage, currentSlug: currentSlug, pageHref: pageHref,
-    onLang: onLang,
     refreshChrome: refreshChrome,
     dialog: function () { return document.getElementById("dialog"); }
   };
@@ -264,7 +279,6 @@
   function init() {
     injectChrome();
     applyTheme();
-    applyLangChrome();
     refreshChrome();
     wire();
     fetchStars();
