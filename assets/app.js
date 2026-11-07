@@ -14,7 +14,7 @@
 
    RENDERERS is the LAYOUT REGISTRY — one entry per supported page layout:
      hub | gallery | article | dashboard | timeline | table |
-     bento | kanban | faq | comparison | leaderboard | scrolly | map
+     bento | kanban | faq | comparison | versus | leaderboard | scrolly | map
    To add a layout, add one renderer (returns the inner HTML for #page) and,
    if it needs interaction, one matching WIRE entry. Nothing else changes.
    ========================================================================= */
@@ -39,7 +39,71 @@
     function head(p) {
       var sub = t(p.subtitle)
         ? '<p class="page-head__sub">' + esc(t(p.subtitle)) + "</p>" : "";
-      return '<header class="page-head"><h1>' + esc(t(p.title)) + "</h1>" + sub + "</header>";
+      var groups = (L.meta && L.meta.groups) || {};
+      var eyebrow = p.group && groups[p.group] && p.layout !== "hub"
+        ? '<p class="page-head__eyebrow">' + esc(t(groups[p.group])) + "</p>" : "";
+      return '<header class="page-head">' + eyebrow + "<h1>" + esc(t(p.title)) + "</h1>" + sub + "</header>";
+    }
+
+    /* text in the page language; `{en,zh}` arrays are picked the same way */
+    function pick(obj) {
+      if (!obj) return [];
+      if (Array.isArray(obj)) return obj;
+      return obj[L.state.lang] || obj.en || obj.zh || [];
+    }
+
+    /* ---- content blocks shared by article-style layouts ----
+       p · h3 · quote · code · ul · note (callout) · stats (number row) ·
+       flow (numbered pipeline) · links (sources)                         */
+    function blocksHtml(blocks) {
+      return (blocks || []).map(function (b) {
+        if (b.type === "h3") return "<h3>" + esc(t(b.text)) + "</h3>";
+        if (b.type === "quote") return "<blockquote>" + esc(t(b.text)) + "</blockquote>";
+        if (b.type === "code") return "<pre><code>" + esc(t(b.text)) + "</code></pre>";
+        if (b.type === "ul") {
+          return "<ul>" + pick(b.items).map(function (li) { return "<li>" + esc(li) + "</li>"; }).join("") + "</ul>";
+        }
+        if (b.type === "note") {
+          return '<aside class="note note--' + esc(b.tone || "info") + '">' +
+            (b.title ? '<b class="note__title">' + esc(t(b.title)) + "</b>" : "") +
+            "<p>" + esc(t(b.text)) + "</p></aside>";
+        }
+        if (b.type === "stats") {
+          return '<div class="figs">' + (b.items || []).map(function (s) {
+            return '<div class="fig"><b class="fig__value">' + esc(t(s.value)) + "</b>" +
+              '<span class="fig__label">' + esc(t(s.label)) + "</span></div>";
+          }).join("") + "</div>";
+        }
+        if (b.type === "flow") {
+          return '<ol class="flow">' + (b.items || []).map(function (s, i) {
+            return '<li class="flow__step"><span class="flow__n" aria-hidden="true">' + (i + 1) + "</span>" +
+              '<div><b class="flow__title">' + esc(t(s.title)) + "</b>" +
+              '<p class="flow__body">' + esc(t(s.body)) + "</p></div></li>";
+          }).join("") + "</ol>";
+        }
+        if (b.type === "links") {
+          return '<ul class="links">' + (b.items || []).map(function (s) {
+            return '<li><a href="' + esc(s.href) + '" target="_blank" rel="noopener">' + esc(t(s.label)) +
+              '<span class="material-symbols-rounded" aria-hidden="true">arrow_outward</span></a>' +
+              (s.meta ? '<span class="links__meta">' + esc(t(s.meta)) + "</span>" : "") + "</li>";
+          }).join("") + "</ul>";
+        }
+        return "<p>" + esc(t(b.text)) + "</p>";
+      }).join("");
+    }
+
+    function sectionsHtml(sections) {
+      return (sections || []).map(function (s) {
+        return '<section class="article-section" id="' + esc(s.id) + '" data-item ' +
+          'aria-labelledby="' + esc(s.id) + '-h"><h2 id="' + esc(s.id) + '-h">' + esc(t(s.heading)) + "</h2>" +
+          blocksHtml(s.blocks) + "</section>";
+      }).join("");
+    }
+
+    function tocHtml(sections) {
+      return (sections || []).map(function (s) {
+        return '<a class="toc-link" href="#' + esc(s.id) + '" data-toc="' + esc(s.id) + '">' + esc(t(s.heading)) + "</a>";
+      }).join("");
     }
 
     function barChart(series, accent) {
@@ -98,16 +162,40 @@
             '<b class="hero__stat-value" data-count="' + esc(String(s.value)) + '">0</b>' +
             '<span class="hero__stat-label">' + esc(t(s.label)) + "</span></div>";
         }).join("");
-        var cards = L.pages.filter(function (q) { return q.slug !== "home"; }).map(function (q) {
+        function card(q) {
           return '<a class="card card--nav" data-item href="' + esc(L.pageHref(q)) + '" ' +
               'aria-label="' + esc(t(q.title)) + '">' +
             '<span class="material-symbols-rounded card__icon" aria-hidden="true">' + esc(q.icon || "label") + "</span>" +
             '<h3 class="card__title">' + esc(t(q.title)) + "</h3>" +
-            '<p class="card__summary">' + esc(t(q.subtitle)) + "</p></a>";
+            '<p class="card__summary">' + esc(t(q.blurb || q.subtitle)) + "</p></a>";
+        }
+        /* featured page (the comparison) gets the big banner, the rest are grouped by source */
+        var feat = null;
+        L.pages.forEach(function (q) { if (q.slug === p.featured) feat = q; });
+        var featHtml = feat
+          ? '<a class="feature" data-item href="' + esc(L.pageHref(feat)) + '">' +
+              '<span class="feature__kicker">' + esc(t(p.featuredKicker)) + "</span>" +
+              '<b class="feature__title">' + esc(t(feat.title)) + "</b>" +
+              '<span class="feature__body">' + esc(t(feat.blurb || feat.subtitle)) + "</span>" +
+              '<span class="feature__cta">' + esc(t(p.featuredCta)) +
+                ' <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></span></a>'
+          : "";
+        var groups = (L.meta && L.meta.groups) || {};
+        var order = [];
+        L.pages.forEach(function (q) {
+          if (q.slug === "home" || q === feat) return;
+          var g = q.group || "";
+          if (order.indexOf(g) === -1) order.push(g);
+        });
+        var sectionsHtml = order.map(function (g) {
+          var list = L.pages.filter(function (q) { return q.slug !== "home" && q !== feat && (q.group || "") === g; });
+          return '<section class="hub-group hub-group--' + esc(g) + '">' +
+            (groups[g] ? '<h2 class="hub-group__title">' + esc(t(groups[g])) + "</h2>" : "") +
+            '<div class="grid">' + list.map(card).join("") + "</div></section>";
         }).join("");
-        return head(p) +
+        return head(p) + featHtml +
           (stats ? '<div class="hero__stats">' + stats + "</div>" : "") +
-          '<div class="grid">' + cards + "</div>";
+          sectionsHtml;
       },
 
       /* ---- gallery: search + chips + card grid + dialog ---- */
@@ -130,29 +218,46 @@
 
       /* ---- article: sticky TOC + prose + reading progress ---- */
       article: function (p) {
-        var toc = (p.sections || []).map(function (s) {
-          return '<a class="toc-link" href="#' + esc(s.id) + '" data-toc="' + esc(s.id) + '">' + esc(t(s.heading)) + "</a>";
-        }).join("");
-        var body = (p.sections || []).map(function (s) {
-          var blocks = (s.blocks || []).map(function (b) {
-            if (b.type === "h3") return "<h3>" + esc(t(b.text)) + "</h3>";
-            if (b.type === "quote") return "<blockquote>" + esc(t(b.text)) + "</blockquote>";
-            if (b.type === "code") return "<pre><code>" + esc(t(b.text)) + "</code></pre>";
-            if (b.type === "ul") {
-              var arr = (b.items && (b.items[L.state.lang] || b.items.en || b.items.zh)) || [];
-              return "<ul>" + arr.map(function (li) { return "<li>" + esc(li) + "</li>"; }).join("") + "</ul>";
-            }
-            return "<p>" + esc(t(b.text)) + "</p>";
-          }).join("");
-          return '<section class="article-section" id="' + esc(s.id) + '" data-item ' +
-            'aria-labelledby="' + esc(s.id) + '-h"><h2 id="' + esc(s.id) + '-h">' + esc(t(s.heading)) + "</h2>" + blocks + "</section>";
-        }).join("");
         return '<div class="reading-progress" id="readingProgress" aria-hidden="true"></div>' +
           head(p) +
           '<div class="article-layout">' +
-            '<nav class="toc" aria-label="Contents"><div class="toc__inner">' + toc + "</div></nav>" +
-            '<div class="article-body prose">' + body + "</div>" +
+            '<nav class="toc" aria-label="Contents"><div class="toc__inner">' + tocHtml(p.sections) + "</div></nav>" +
+            '<div class="article-body prose">' + sectionsHtml(p.sections) + "</div>" +
           "</div>";
+      },
+
+      /* ---- versus: two systems side by side, grouped dimensions + prose ----
+         Each row is a real <tr>; on narrow screens CSS restacks the cells and
+         labels them from data-label, so the table never scrolls sideways.   */
+      versus: function (p) {
+        var sides = p.sides || [];
+        var cards = (p.takeaways || []).map(function (k, i) {
+          return '<article class="take" data-item><span class="take__n">0' + (i + 1) + "</span>" +
+            '<h3 class="take__title">' + esc(t(k.title)) + "</h3>" +
+            '<p class="take__body">' + esc(t(k.body)) + "</p></article>";
+        }).join("");
+        var headCells = sides.map(function (s) {
+          return '<th scope="col" class="vs-side vs-side--' + esc(s.key) + '">' +
+            '<span class="vs-side__name">' + esc(t(s.name)) + "</span>" +
+            '<span class="vs-side__meta">' + esc(t(s.meta)) + "</span></th>";
+        }).join("");
+        var groups = (p.groups || []).map(function (g) {
+          var rows = (g.rows || []).map(function (row) {
+            var cells = sides.map(function (s) {
+              return '<td class="vs-cell vs-cell--' + esc(s.key) + '" data-label="' + esc(t(s.name)) + '">' +
+                esc(t(row[s.key])) + "</td>";
+            }).join("");
+            return '<tr data-item><th scope="row" class="vs-dim">' + esc(t(row.dim)) + "</th>" + cells + "</tr>";
+          }).join("");
+          return '<tbody class="vs-group"><tr class="vs-group__head"><th colspan="' + (sides.length + 1) + '" scope="rowgroup">' +
+            esc(t(g.heading)) + "</th></tr>" + rows + "</tbody>";
+        }).join("");
+        return head(p) +
+          '<div class="takes">' + cards + "</div>" +
+          '<div class="vs-wrap"><table class="vs-table">' +
+            '<thead><tr><th scope="col" class="vs-corner">' + esc(t(p.dimLabel)) + "</th>" + headCells + "</tr></thead>" +
+            groups + "</table></div>" +
+          '<div class="vs-prose prose">' + sectionsHtml(p.sections) + "</div>";
       },
 
       /* ---- dashboard: stat cards + bar + line + table ---- */
@@ -514,6 +619,7 @@
       },
 
       comparison: function () { /* static */ },
+      versus: function () { /* static */ },
 
       leaderboard: function (p) {
         var view = document.getElementById("lbView");
