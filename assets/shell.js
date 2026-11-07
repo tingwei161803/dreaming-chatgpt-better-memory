@@ -56,9 +56,14 @@
   }
 
   /* ---------- global state ---------- */
+  /* a visitor who never picked a theme gets their OS preference */
+  function systemTheme() {
+    try { return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+    catch (e) { return "light"; }
+  }
   var state = {
     lang:  docLang(),
-    theme: lsGet("theme") || "light"
+    theme: lsGet("theme") || systemTheme()
   };
 
   /* ---------- helpers shared with app.js ---------- */
@@ -127,7 +132,7 @@
     appbar.innerHTML =
       '<div class="appbar__inner">' +
         '<a class="brand" href="index.html">' +
-          '<span class="material-symbols-rounded brand__logo">hub</span>' +
+          '<span class="material-symbols-rounded brand__logo" aria-hidden="true">bedtime</span>' +
           '<span class="brand__name" id="brandName"></span>' +
         '</a>' +
         '<div class="appbar__actions">' +
@@ -140,12 +145,20 @@
       '</div>';
     document.body.insertBefore(appbar, main);
 
-    /* cross-page nav */
+    /* body layout: [sidebar nav | main + footer]. On narrow screens CSS turns
+       the sidebar into a horizontal strip under the app bar. */
+    var layout = document.createElement("div");
+    layout.className = "layout";
+    document.body.insertBefore(layout, main);
     var nav = document.createElement("nav");
     nav.className = "pagenav";
     nav.id = "pageNav";
     nav.innerHTML = '<div class="pagenav__inner" id="pageNavInner"></div>';
-    document.body.insertBefore(nav, main);
+    layout.appendChild(nav);
+    var column = document.createElement("div");
+    column.className = "layout__main";
+    layout.appendChild(column);
+    column.appendChild(main);
 
     /* footer */
     var footer = document.createElement("footer");
@@ -188,7 +201,18 @@
     if (!inner) return;
     inner.innerHTML = "";
     var here = currentSlug();
+    var groups = META.groups || {};
+    var lastGroup = null;
     PAGES.forEach(function (p) {
+      /* a small heading whenever the source group changes (ChatGPT / Claude …) */
+      var g = p.group || "";
+      if (g !== lastGroup && groups[g]) {
+        var h = document.createElement("span");
+        h.className = "navgroup navgroup--" + g;
+        h.textContent = t(groups[g]);
+        inner.appendChild(h);
+      }
+      lastGroup = g;
       var a = document.createElement("a");
       a.className = "navpill" + (p.slug === here ? " navpill--active" : "");
       a.href = pageHref(p);
@@ -196,13 +220,14 @@
       a.innerHTML =
         '<span class="material-symbols-rounded" aria-hidden="true">' +
           escapeHtml(p.icon || "label") + "</span>" +
-        "<span>" + escapeHtml(t(p.title)) + "</span>";
+        "<span>" + escapeHtml(t(p.navTitle || p.title)) + "</span>";
       inner.appendChild(a);
     });
     /* keep the active pill in view within the scrolling nav */
+    /* (only the horizontal strip scrolls; never scroll the window itself) */
     var active = inner.querySelector(".navpill--active");
-    if (active && active.scrollIntoView) {
-      active.scrollIntoView({ block: "nearest", inline: "center" });
+    if (active && inner.scrollWidth > inner.clientWidth) {
+      inner.scrollLeft = active.offsetLeft - (inner.clientWidth - active.offsetWidth) / 2;
     }
   }
 

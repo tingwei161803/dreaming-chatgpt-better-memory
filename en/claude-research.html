@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <!-- ==== Google Analytics 4 (Measurement ID: G-268DMFJJT4) ==== -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-268DMFJJT4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-268DMFJJT4');
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>The components of agent memory · ChatGPT Dreaming</title>
+  <meta name="description" content="Anthropic's research post on how Claude writes, corrects and organizes memory — and what dreaming adds, measured on CL-Bench, Pokémon Red and legal-document wikis." />
+  <meta name="theme-color" content="#4338CA" />
+  <link rel="canonical" href="https://dreaming-chatgpt-better-memory.peteraim.com/en/claude-research.html" />
+  <link rel="alternate" hreflang="zh-Hant" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html" />
+  <link rel="alternate" hreflang="en" href="https://dreaming-chatgpt-better-memory.peteraim.com/en/claude-research.html" />
+  <link rel="alternate" hreflang="x-default" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ChatGPT Dreaming" />
+  <meta property="og:title" content="The components of agent memory · ChatGPT Dreaming" />
+  <meta property="og:description" content="Anthropic's research post on how Claude writes, corrects and organizes memory — and what dreaming adds, measured on CL-Bench, Pokémon Red and legal-document wikis." />
+  <meta property="og:url" content="https://dreaming-chatgpt-better-memory.peteraim.com/en/claude-research.html" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_TW" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The components of agent memory · ChatGPT Dreaming" />
+  <meta name="twitter:description" content="Anthropic's research post on how Claude writes, corrects and organizes memory — and what dreaming adds, measured on CL-Bench, Pokémon Red and legal-document wikis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "The components of agent memory · ChatGPT Dreaming",
+    "description": "Anthropic's research post on how Claude writes, corrects and organizes memory — and what dreaming adds, measured on CL-Bench, Pokémon Red and legal-document wikis.",
+    "inLanguage": "en",
+    "url": "https://dreaming-chatgpt-better-memory.peteraim.com/en/claude-research.html",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "ChatGPT Dreaming",
+      "url": "https://dreaming-chatgpt-better-memory.peteraim.com/"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "AI agent dreaming memory"
+    },
+    "isBasedOn": "https://www.anthropic.com/research/components-of-agent-memory"
+  }
+  </script>
+  <meta property="og:image" content="https://dreaming-chatgpt-better-memory.peteraim.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:image" content="https://dreaming-chatgpt-better-memory.peteraim.com/og-image.png">
+</head>
+<body data-page="claude-research">
+  <!-- shell.js injects the app bar, cross-page nav, footer and dialog around this -->
+  <main id="page">
+<div class="reading-progress" id="readingProgress" aria-hidden="true" style="width: 0%;"></div><header class="page-head"><p class="page-head__eyebrow">Claude · Anthropic</p><h1>The components of agent memory</h1><p class="page-head__sub">Anthropic's research post on how Claude writes, corrects and organizes memory — and what dreaming adds, measured on CL-Bench, Pokémon Red and legal-document wikis.</p></header><div class="article-layout"><nav class="toc" aria-label="Contents"><div class="toc__inner"><a class="toc-link" href="#frame" data-toc="frame">Encode now, consolidate later</a><a class="toc-link" href="#prediction" data-toc="prediction">Memory is a prediction</a><a class="toc-link" href="#salience" data-toc="salience">Judging what's worth remembering</a><a class="toc-link" href="#dreaming" data-toc="dreaming">Five things dreaming does</a><a class="toc-link" href="#open" data-toc="open">Open questions</a><a class="toc-link toc-link--active" href="#source" data-toc="source">Source</a></div></nav><div class="article-body prose"><section class="article-section" id="frame" data-item="" aria-labelledby="frame-h"><h2 id="frame-h">Encode now, consolidate later</h2><blockquote>Søren Kierkegaard wrote that life can only be understood backward, but it must be lived forward.</blockquote><p>People encode memory constantly, but much consolidation seems to happen offline: during sleep the hippocampus replays recent experience and integrates it into the neocortex. Agents can split the work the same way — capture work in logs as it happens, then reflect on those logs to fix mistakes or build new notes. Building on the sleep-time compute idea from Letta and UC Berkeley, that reflection is what the post calls dreaming.</p><p>“Agent memory” here means knowledge Claude gains from experience and keeps between sessions as context it can read later. It excludes weight updates, in-context learning within one conversation, and compaction.</p></section><section class="article-section" id="prediction" data-item="" aria-labelledby="prediction-h"><h2 id="prediction-h">Memory is a prediction</h2><p>Writing down a rule predicts the pattern will matter again. On a CL-Bench 1.0 database task — answer, see the correct solution, write memory, start the next question in a fresh session — models differed in how far they got with that learning loop:</p><ul><li>Claude Sonnet 4.6 got as far as theories about why an answer was wrong: scattered files of untested guesses.</li><li>Claude Opus 4.7 consolidated notes into one reference document and marked which facts were checked.</li><li>Claude Sonnet 5 marked answers as confirmed after grading and wrote corrections when wrong.</li><li>Claude Opus 5 was the first to close the loop: rules plus how it knew they were true, earlier answers, and warnings about traps. Opus 5.5 and Sonnet 5.5 also closed it.</li></ul></section><section class="article-section" id="salience" data-item="" aria-labelledby="salience-h"><h2 id="salience-h">Judging what's worth remembering</h2><p>In Pokémon Red, about 10,000 steps in, the difference was what each model thought was worth saving:</p><div class="figs"><div class="fig"><b class="fig__value">413</b><span class="fig__label">memory files in 225 folders — Sonnet 3.7, 1 badge</span></div><div class="fig"><b class="fig__value">9</b><span class="fig__label">files in 2 folders plus global.md — Fable 5, 4 badges</span></div></div><p>Sonnet 3.7 recorded everything, including things it could read off the screen every turn, so its notes kept going stale; around step 10,000 it spent 17 steps creating six files and deleting nine without making a move. Fable 5 kept only what the game doesn't tell you — strategy, plans and tested rules — with global.md as a dashboard. Opus 5.5 kept a similarly small folder and beat the game.</p><h3>Say what memory is for, not how to use it</h3><p>Telling Opus 5 and Opus 4.7 to “record only failures” cost them much of their gain from memory. Steering helps older models most: prompting Sonnet 4.6 to read its memory before answering and to test its theories nearly doubled its score. Sonnet 5 read its memory before answering 9 times out of 10 unprompted; Sonnet 4.6 did so less than half the time.</p></section><section class="article-section" id="dreaming" data-item="" aria-labelledby="dreaming-h"><h2 id="dreaming-h">Five things dreaming does</h2><h3>1 · Correct memory</h3><p>Claude wrongly noted that the PokéCenter at Mt. Moon was on the east side, declared “Mt Moon DONE”, and kept dropping off a one-way ledge back onto the earlier route. Dreaming checked the note against the transcript and rewrote it; with the corrected note Claude went back into the cave and reached Cerulean City. With the uncorrected note it fell back three times and never got past the mountain.</p><h3>2 · Build new representations</h3><p>A wiki — linked pages Claude writes and maintains — gives it a map of its own knowledge. On about 350,000 internal Stainless files (roughly 420M tokens) and 25 questions, Opus 5 agents built a wiki over successive sessions:</p><div class="figs"><div class="fig"><b class="fig__value">13% → 48%</b><span class="fig__label">wiki-only score, 2 → 128 dreaming sessions</span></div><div class="fig"><b class="fig__value">54% → 61%</b><span class="fig__label">search + wiki as the wiki grew (search alone: 53%)</span></div><div class="fig"><b class="fig__value">≈20K</b><span class="fig__label">tokens saved per question with search + wiki</span></div><div class="fig"><b class="fig__value">87% vs 73%</b><span class="fig__label">merger questions: wiki vs search alone</span></div></div><p>The wiki helped most on questions that needed several documents, judgment or math. On a Harvey LAB task where most criteria came from a single document, it showed no clear gain; on another, the wiki grew larger than the documents themselves — like the map in Borges's “On Exactitude in Science”.</p><h3>3 · Promote notes up the hierarchy</h3><p>Dreaming can float notes to the top layer that the harness loads into every session. That layer must stay small: injected notes cost tokens, a wrong note reaches every session, and longer instruction files reduce adherence. Claude Code's auto memory, for instance, loads only the first 200 lines or 25 KB of MEMORY.md, which works as an index.</p><h3>4 · Focus memory on a goal</h3><p>On a LAB acquisition task, several agents writing one shared table of contract terms overwrote each other, and a brief from that wiki met only 41 of 57 graded facts (72%). After a loop in which Claude reflected on its failures and rewrote the instructions — one agent per contract, quoting terms word for word — it met 57 of 57.</p><h3>5 · Fill gaps a session leaves</h3><p>A session sees only its own context; dreaming looks across many. A second dreaming pass over one wiki found nine links to a missing page and repointed them to an existing one, and added three new pages, including an index.</p></section><section class="article-section" id="open" data-item="" aria-labelledby="open-h"><h2 id="open-h">Open questions</h2><ul><li>When to write memory: in-session notes capture salience at the source but distract from the task; dreaming moves the work to the background, but its output isn't available right away.</li><li>How to keep memory current: dreaming fixes mistakes but costs compute, so it may be better focused on information likely to change, or on a cadence tuned to how often memories are read.</li><li>Whether transcript search should be the foundation: wikis plus search can work well, but representations need compute to keep free of accumulated errors.</li></ul></section><section class="article-section" id="source" data-item="" aria-labelledby="source-h"><h2 id="source-h">Source</h2><ul class="links"><li><a href="https://www.anthropic.com/research/components-of-agent-memory" target="_blank" rel="noopener">Anthropic — The components of agent memory<span class="material-symbols-rounded" aria-hidden="true">arrow_outward</span></a><span class="links__meta">Lance Martin · Nov 6 2026</span></li></ul></section></div></div>
+</main>
+
+  <script src="../data/data.js"></script>
+  <script src="../assets/shell.js"></script>
+  <script src="../assets/app.js"></script>
+<p class="lang-alt-link" style="text-align:center;padding:12px;"><a href="/claude-research.html" hreflang="zh-Hant" rel="alternate" lang="zh-Hant">中文版</a></p>
+</body>
+</html>
