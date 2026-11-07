@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <!-- ==== Google Analytics 4 (Measurement ID: G-268DMFJJT4) ==== -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-268DMFJJT4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-268DMFJJT4');
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>用 Managed Agents 做一個夢 · ChatGPT 做夢記憶</title>
+  <meta name="description" content="Anthropic 的 cookbook 做了一個小而可用的夢:用 Managed Agents 的動態工作流程讀取已結束的 session,提煉成 wiki 式的 memory store,讓之後的 session 以唯讀方式掛載,而且可以用 cron 每晚自動跑。" />
+  <meta name="theme-color" content="#4338CA" />
+  <link rel="canonical" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-workflow.html" />
+  <link rel="alternate" hreflang="zh-Hant" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-workflow.html" />
+  <link rel="alternate" hreflang="en" href="https://dreaming-chatgpt-better-memory.peteraim.com/en/claude-workflow.html" />
+  <link rel="alternate" hreflang="x-default" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-workflow.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ChatGPT 做夢記憶" />
+  <meta property="og:title" content="用 Managed Agents 做一個夢 · ChatGPT 做夢記憶" />
+  <meta property="og:description" content="Anthropic 的 cookbook 做了一個小而可用的夢:用 Managed Agents 的動態工作流程讀取已結束的 session,提煉成 wiki 式的 memory store,讓之後的 session 以唯讀方式掛載,而且可以用 cron 每晚自動跑。" />
+  <meta property="og:url" content="https://dreaming-chatgpt-better-memory.peteraim.com/claude-workflow.html" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="用 Managed Agents 做一個夢 · ChatGPT 做夢記憶" />
+  <meta name="twitter:description" content="Anthropic 的 cookbook 做了一個小而可用的夢:用 Managed Agents 的動態工作流程讀取已結束的 session,提煉成 wiki 式的 memory store,讓之後的 session 以唯讀方式掛載,而且可以用 cron 每晚自動跑。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "用 Managed Agents 做一個夢 · ChatGPT 做夢記憶",
+    "description": "Anthropic 的 cookbook 做了一個小而可用的夢:用 Managed Agents 的動態工作流程讀取已結束的 session,提煉成 wiki 式的 memory store,讓之後的 session 以唯讀方式掛載,而且可以用 cron 每晚自動跑。",
+    "inLanguage": "zh-TW",
+    "url": "https://dreaming-chatgpt-better-memory.peteraim.com/claude-workflow.html",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "ChatGPT 做夢記憶",
+      "url": "https://dreaming-chatgpt-better-memory.peteraim.com/"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "AI agent dreaming memory"
+    },
+    "isBasedOn": "https://platform.claude.com/cookbook/managed-agents-cma-dreaming-with-a-dynamic-workflow"
+  }
+  </script>
+  <meta property="og:image" content="https://dreaming-chatgpt-better-memory.peteraim.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:image" content="https://dreaming-chatgpt-better-memory.peteraim.com/og-image.png">
+</head>
+<body data-page="claude-workflow">
+  <!-- shell.js injects the app bar, cross-page nav, footer and dialog around this -->
+  <main id="page">
+<div class="reading-progress" id="readingProgress" aria-hidden="true" style="width: 0%;"></div><header class="page-head"><p class="page-head__eyebrow">Claude · Anthropic</p><h1>用 Managed Agents 做一個夢</h1><p class="page-head__sub">Anthropic 的 cookbook 做了一個小而可用的夢:用 Managed Agents 的動態工作流程讀取已結束的 session,提煉成 wiki 式的 memory store,讓之後的 session 以唯讀方式掛載,而且可以用 cron 每晚自動跑。</p></header><div class="article-layout"><nav class="toc" aria-label="Contents"><div class="toc__inner"><a class="toc-link" href="#idea" data-toc="idea">想法</a><a class="toc-link" href="#pipeline" data-toc="pipeline">流程</a><a class="toc-link" href="#analyzer" data-toc="analyzer">analyzer 怎麼工作</a><a class="toc-link" href="#safety" data-toc="safety">把逐字稿當成不可信的輸入</a><a class="toc-link" href="#cost" data-toc="cost">成本與限制</a><a class="toc-link" href="#nightly" data-toc="nightly">每晚做夢</a><a class="toc-link" href="#make-it-yours" data-toc="make-it-yours">改成你要的樣子</a><a class="toc-link toc-link--active" href="#source" data-toc="source">資料來源</a></div></nav><div class="article-body prose"><section class="article-section" id="idea" data-item="" aria-labelledby="idea-h"><h2 id="idea-h">想法</h2><p>你的 agent 會跑很多個 session,而每一個開始時都一無所知。做夢是一道背景程序:帶著後見之明回頭看過去的逐字稿,改善未來 session 會讀到的記憶——修正後來證明是錯的內容、建立更容易搜尋的形式,並把重要的東西放在隨手可得的地方。</p><aside class="note note--info"><b class="note__title">Cookbook 與 Dreams 預覽版的差別</b><p>Dreams 是 Managed Agents 的研究預覽版:讀取 memory store 與過去的 session,把整理後的版本寫進新的 store,可以直接吃 session ID。Cookbook 則是自己動手做同一件事,prompt、模型、輸入都由你決定,並且直接更新原本的 store。</p></aside></section><section class="article-section" id="pipeline" data-item="" aria-labelledby="pipeline-h"><h2 id="pipeline-h">流程</h2><ol class="flow"><li class="flow__step"><span class="flow__n" aria-hidden="true">1</span><div><b class="flow__title">匯出 session</b><p class="flow__body">每個已結束(idle 或 terminated)的 session 匯出成一份純文字逐字稿,用 USER:、AGENT:、TOOL CALL、TOOL RESULT 標記區塊。工具結果最重要,它記錄了 agent 實際做了什麼。</p></div></li><li class="flow__step"><span class="flow__n" aria-hidden="true">2</span><div><b class="flow__title">給 lead agent 一則訊息</b><p class="flow__body">用白話描述要做的事。lead agent(Claude Sonnet 5.5)據此寫出工作流程並啟動。它自己從不讀逐字稿。</p></div></li><li class="flow__step"><span class="flow__n" aria-hidden="true">3</span><div><b class="flow__title">Analyze 階段</b><p class="flow__body">每份逐字稿一個 analyzer(Claude Haiku 5.5),約 20 個一組。每個都先讀完整份逐字稿,再驗證、補充、整理共用的記憶檔。</p></div></li><li class="flow__step"><span class="flow__n" aria-hidden="true">4</span><div><b class="flow__title">Organize 階段</b><p class="flow__body">所有 analyzer 結束後,organizer(Claude Haiku 5.5)跑一次:合併重複、修正連結、標記矛盾、補齊 _index.md,一條事實都不丟。</p></div></li><li class="flow__step"><span class="flow__n" aria-hidden="true">5</span><div><b class="flow__title">唯讀掛載</b><p class="flow__body">agent 的下一個 session 以唯讀方式掛載 memory store,從 _index.md 開始讀。</p></div></li></ol></section><section class="article-section" id="analyzer" data-item="" aria-labelledby="analyzer-h"><h2 id="analyzer-h">analyzer 怎麼工作</h2><p>做法寫在 analyzer 的 prompt 裡,改 prompt 就能改變記憶留下什麼。一共四步:</p><ul><li>讀完整份逐字稿——可以分頁讀,但不能讀到一半就停。</li><li>拿它驗證記憶既有的說法:沒有證據支持的先別動,互相矛盾的要修,逐字稿顯示當時其實不確定的要降級。</li><li>補上精確的識別碼、指令、數值、過時註記,以及繞了遠路才找到正解的過程。</li><li>整理成附 frontmatter(name、description)的小檔,用 [[slug]] 連結相關主題,並維持 _index.md 最新。</li></ul><p>多個 analyzer 同時寫同一個資料夾,所以 prompt 要求它們:編輯前重讀檔案、用局部修改而不是整檔重寫、每次寫完讀回來確認真的寫進去了。最後一段要求盡量減少輪數,因為每一輪都會把讀過的內容整包重送一次。</p><h3>實例:事實會過時</h3><p>範例資料是 11 份關於虛構 Python 專案 tidewick 的合成檔案。一開始,make test 要設定 TIDEWICK_DATA_DIR 才會過;後來的版本拿掉了這個需求。記憶必須替早期的事實標日期、標明已被取代,而不是照抄——organizer 最後也正是把這個矛盾判定為「依版本而定」。</p></section><section class="article-section" id="safety" data-item="" aria-labelledby="safety-h"><h2 id="safety-h">把逐字稿當成不可信的輸入</h2><p>逐字稿裡的某個工具結果,可能寫著「忽略你的指令」。cookbook 的防護如下:</p><ul><li>prompt 把逐字稿、記憶檔與執行結果都當成資料,不當指令。逐字稿的內容不會進到 prompt 裡,analyzer 是用 read 工具自己打開檔案。</li><li>analyzer 只有 read、write、edit、glob、grep 五個檔案工具,沒有 shell、沒有網路,網路白名單是空的。</li><li>不把機密抄進記憶,只寫憑證的名字(例如「部署用的 token」)。</li><li>最壞的情況,是被注入的指令改掉 store 的內容、花光你的預算。所以除了做夢的那個 session,其他地方一律唯讀掛載。</li></ul><aside class="note note--warn"><b class="note__title">放進 system prompt 要小心</b><p>可以把 store 裡的一個小檔(例如 _index.md)當作掛載說明放進 system prompt,上限 4,096 字元。但它每個 session 都要付 token,錯的一行會影響每個 session,逐字稿偷塞進來的東西也會影響每個 session。</p></aside></section><section class="article-section" id="cost" data-item="" aria-labelledby="cost-h"><h2 id="cost-h">成本與限制</h2><div class="figs"><div class="fig"><b class="fig__value">$0.36</b><span class="fig__label">11 份範例逐字稿(283 KB),約 2.5 分鐘</span></div><div class="fig"><b class="fig__value">≈$8</b><span class="fig__label">50 份長逐字稿(約 12 MB),約 10 分鐘</span></div><div class="fig"><b class="fig__value">64</b><span class="fig__label">一個 workflow run 同時處理的 thread 上限</span></div><div class="fig"><b class="fig__value">500</b><span class="fig__label">一個 session 最多掛載的檔案數</span></div></div><p>以上都是定價表價格。在 50 份逐字稿的測試中,幾個省錢設定(分組、減少輪數的 prompt 段落、純文字逐字稿、用 Haiku 當 organizer)讓一次做夢從約 $10 降到約 $8,而產出的 store 涵蓋固定事實清單的比例差不多。執行前會先印出估價,超過 BUDGET_USD(預設 $40,是上限而不是預期花費)就停下。</p></section><section class="article-section" id="nightly" data-item="" aria-labelledby="nightly-h"><h2 id="nightly-h">每晚做夢</h2><p>dreaming_nightly.py 讓 cron 去跑 notebook:匯出上次之後 agent 已結束的 session,做夢後寫進同一個 store:</p><pre><code>0 1 * * * mkdir -p ~/.cache/memory_distill &amp;&amp; cd /path/to/managed_agents &amp;&amp; COOKBOOK_AGENT_ID=agent_... COOKBOOK_STORE_ID=memstore_... /path/to/python dreaming_nightly.py &gt;&gt; ~/.cache/memory_distill/nightly.log 2&gt;&amp;1</code></pre><ul><li>憑證只留在腳本這邊。匯出在你自己的機器上進行;做夢的 session 沒有網路、也沒有金鑰。</li><li>某晚失敗會重試:隔天晚上會再處理同一批 session。</li><li>凌晨 1 點還在跑的 session 會被跳過,之後也不會回頭補。</li><li>預設不審閱。每次執行前會先備份 store,每次修改都是可稽核 30 天的 memory version。</li></ul></section><section class="article-section" id="make-it-yours" data-item="" aria-labelledby="make-it-yours-h"><h2 id="make-it-yours-h">改成你要的樣子</h2><p>一個夢由三個選擇決定:何時跑、讀哪些逐字稿、拿它們做什麼。可以調整的地方(環境變數或 prompt 檔):</p><ul><li>排程:改 crontab 那一行(0 1 * * 1 是每週一凌晨 1 點)。</li><li>逐字稿:COOKBOOK_AGENT_ID 指定 agent,COOKBOOK_SINCE 指定往回多久,或讓 TRANSCRIPTS 指向一個放紀錄的資料夾。</li><li>節奏:prompts/work_request.md 的最後一句決定每組幾份。</li><li>重點:INSTRUCTIONS,例如「這份記憶是要幫助助理服務一個人,請圍繞那個人的目標、偏好與長期要求來整理」。</li><li>形式:prompts/analyzer_system.md 與 prompts/organizer_system.md。</li><li>模型:COOKBOOK_MODEL、COOKBOOK_ANALYZER_MODEL、COOKBOOK_ORGANIZER_MODEL。做夢在背景執行,所以可以用比 agent 本身更強的模型。</li></ul></section><section class="article-section" id="source" data-item="" aria-labelledby="source-h"><h2 id="source-h">資料來源</h2><ul class="links"><li><a href="https://platform.claude.com/cookbook/managed-agents-cma-dreaming-with-a-dynamic-workflow" target="_blank" rel="noopener">Anthropic cookbook —〈Dreaming with a dynamic workflow〉<span class="material-symbols-rounded" aria-hidden="true">arrow_outward</span></a><span class="links__meta">Brad Abrams · 2026/11/2</span></li></ul></section></div></div>
+</main>
+
+  <script src="data/data.js"></script>
+  <script src="assets/shell.js"></script>
+  <script src="assets/app.js"></script>
+<p class="lang-alt-link" style="text-align:center;padding:12px;"><a href="/en/claude-workflow.html" hreflang="en" rel="alternate" lang="en">English version</a></p>
+</body>
+</html>

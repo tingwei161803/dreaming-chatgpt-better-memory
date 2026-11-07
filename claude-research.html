@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <!-- ==== Google Analytics 4 (Measurement ID: G-268DMFJJT4) ==== -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-268DMFJJT4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-268DMFJJT4');
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Agent 記憶的組成 · ChatGPT 做夢記憶</title>
+  <meta name="description" content="Anthropic 的研究文:Claude 怎麼寫下、修正、整理記憶,以及做夢帶來什麼——在 CL-Bench、Pokémon 紅版與法律文件 wiki 上實測。" />
+  <meta name="theme-color" content="#4338CA" />
+  <link rel="canonical" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html" />
+  <link rel="alternate" hreflang="zh-Hant" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html" />
+  <link rel="alternate" hreflang="en" href="https://dreaming-chatgpt-better-memory.peteraim.com/en/claude-research.html" />
+  <link rel="alternate" hreflang="x-default" href="https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ChatGPT 做夢記憶" />
+  <meta property="og:title" content="Agent 記憶的組成 · ChatGPT 做夢記憶" />
+  <meta property="og:description" content="Anthropic 的研究文:Claude 怎麼寫下、修正、整理記憶,以及做夢帶來什麼——在 CL-Bench、Pokémon 紅版與法律文件 wiki 上實測。" />
+  <meta property="og:url" content="https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Agent 記憶的組成 · ChatGPT 做夢記憶" />
+  <meta name="twitter:description" content="Anthropic 的研究文:Claude 怎麼寫下、修正、整理記憶,以及做夢帶來什麼——在 CL-Bench、Pokémon 紅版與法律文件 wiki 上實測。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Agent 記憶的組成 · ChatGPT 做夢記憶",
+    "description": "Anthropic 的研究文:Claude 怎麼寫下、修正、整理記憶,以及做夢帶來什麼——在 CL-Bench、Pokémon 紅版與法律文件 wiki 上實測。",
+    "inLanguage": "zh-TW",
+    "url": "https://dreaming-chatgpt-better-memory.peteraim.com/claude-research.html",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "ChatGPT 做夢記憶",
+      "url": "https://dreaming-chatgpt-better-memory.peteraim.com/"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "AI agent dreaming memory"
+    },
+    "isBasedOn": "https://www.anthropic.com/research/components-of-agent-memory"
+  }
+  </script>
+  <meta property="og:image" content="https://dreaming-chatgpt-better-memory.peteraim.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:image" content="https://dreaming-chatgpt-better-memory.peteraim.com/og-image.png">
+</head>
+<body data-page="claude-research">
+  <!-- shell.js injects the app bar, cross-page nav, footer and dialog around this -->
+  <main id="page">
+<div class="reading-progress" id="readingProgress" aria-hidden="true" style="width: 0%;"></div><header class="page-head"><p class="page-head__eyebrow">Claude · Anthropic</p><h1>Agent 記憶的組成</h1><p class="page-head__sub">Anthropic 的研究文:Claude 怎麼寫下、修正、整理記憶,以及做夢帶來什麼——在 CL-Bench、Pokémon 紅版與法律文件 wiki 上實測。</p></header><div class="article-layout"><nav class="toc" aria-label="Contents"><div class="toc__inner"><a class="toc-link" href="#frame" data-toc="frame">當下記錄,事後鞏固</a><a class="toc-link" href="#prediction" data-toc="prediction">記憶是一種預測</a><a class="toc-link" href="#salience" data-toc="salience">判斷什麼值得記</a><a class="toc-link" href="#dreaming" data-toc="dreaming">做夢能做的五件事</a><a class="toc-link" href="#open" data-toc="open">還沒解決的問題</a><a class="toc-link toc-link--active" href="#source" data-toc="source">資料來源</a></div></nav><div class="article-body prose"><section class="article-section" id="frame" data-item="" aria-labelledby="frame-h"><h2 id="frame-h">當下記錄,事後鞏固</h2><blockquote>齊克果寫道:人生只能向後理解,卻必須向前活。</blockquote><p>人隨時都在記錄記憶,但鞏固多半發生在離線時:睡眠中,海馬迴重播最近的經驗,把它整合進新皮質。agent 也可以這樣分工——工作時留下紀錄,事後再回頭反思,修正錯誤、寫出新的筆記。延伸 Letta 與 UC Berkeley 提出的 sleep-time compute 概念,這個反思的過程就是文中說的「做夢」。</p><p>文中的「agent 記憶」,指 Claude 從經驗中獲得、跨 session 保存、之後能讀取的脈絡。不包括權重更新、單次對話內的 in-context learning,也不包括 compaction(摘要取代舊的對話輪次)。</p></section><section class="article-section" id="prediction" data-item="" aria-labelledby="prediction-h"><h2 id="prediction-h">記憶是一種預測</h2><p>寫下一條規則,就是預測這個模式之後還會用到。在 CL-Bench 1.0 的資料庫任務中——回答、看到正解、寫記憶、下一題開新 session——各模型能把這個學習迴圈走到多遠,差別很大:</p><ul><li>Claude Sonnet 4.6:只走到「推測為什麼答錯」,留下一堆沒驗證過的猜測檔案。</li><li>Claude Opus 4.7:把筆記整併成一份參考文件,並標出哪些事實驗證過。</li><li>Claude Sonnet 5:批改後把答案標成「已確認」,答錯時寫下更正。</li><li>Claude Opus 5:第一個把迴圈走完的模型——規則加上「怎麼知道它是對的」、先前的答案、踩過的陷阱。Opus 5.5 與 Sonnet 5.5 也都走完了。</li></ul></section><section class="article-section" id="salience" data-item="" aria-labelledby="salience-h"><h2 id="salience-h">判斷什麼值得記</h2><p>在 Pokémon 紅版裡,大約第 10,000 步時,差別在於各模型覺得什麼值得存:</p><div class="figs"><div class="fig"><b class="fig__value">413</b><span class="fig__label">個記憶檔、225 個資料夾——Sonnet 3.7,1 枚徽章</span></div><div class="fig"><b class="fig__value">9</b><span class="fig__label">個檔案、2 個資料夾加 global.md——Fable 5,4 枚徽章</span></div></div><p>Sonnet 3.7 什麼都記,連每一輪都能直接從畫面上讀到的資訊也記,結果筆記不停過時;大約第 10,000 步時,它花了 17 步新增 6 個檔、刪掉 9 個,遊戲本身一步都沒動。Fable 5 只記遊戲不會告訴你的東西——策略、計畫與驗證過的規則,並把 global.md 當儀表板。Opus 5.5 也維持一個小資料夾,最後破關。</p><h3>告訴它記憶的用途,而不是用法</h3><p>要求 Opus 5 與 Opus 4.7「只記錄失敗」,反而讓它們失去大部分來自記憶的進步。引導對較舊的模型最有用:提示 Sonnet 4.6 回答前先讀記憶、並驗證自己的推測,分數幾乎翻倍。Sonnet 5 不用提示,10 次裡有 9 次會先讀記憶;Sonnet 4.6 不到一半。</p></section><section class="article-section" id="dreaming" data-item="" aria-labelledby="dreaming-h"><h2 id="dreaming-h">做夢能做的五件事</h2><h3>1 · 修正記憶</h3><p>Claude 誤記月見山的 PokéCenter 在東側,宣布「Mt Moon DONE」,然後一再從單向的岩階摔回原本的道路。做夢拿逐字稿核對後改寫了這條筆記;有了正確筆記,Claude 回到洞窟,抵達華藍市。沒改的那一輪摔回去三次,始終沒能翻過這座山。</p><h3>2 · 建立新的記憶形式</h3><p>wiki——由 Claude 撰寫並維護、互相連結的頁面——等於替自己的知識畫一張地圖。在 Stainless 約 35 萬個內部檔案(約 4.2 億 token)、25 個問題上,Opus 5 agent 一輪一輪建出 wiki:</p><div class="figs"><div class="fig"><b class="fig__value">13% → 48%</b><span class="fig__label">只用 wiki 的得分,做夢 2 → 128 個 session</span></div><div class="fig"><b class="fig__value">54% → 61%</b><span class="fig__label">搜尋 + wiki,隨 wiki 成長(只用搜尋:53%)</span></div><div class="fig"><b class="fig__value">≈20K</b><span class="fig__label">搜尋 + wiki 每題省下的 token</span></div><div class="fig"><b class="fig__value">87% vs 73%</b><span class="fig__label">併購問題:wiki 對比只用搜尋</span></div></div><p>wiki 最有用的,是需要跨多份文件、需要判斷或計算的問題。在一個 Harvey LAB 任務裡,多數評分項目只靠單一文件就能找到,wiki 沒有明顯幫助;另一個任務的 wiki 甚至長得比原始文件還大——就像波赫士〈論科學的精確性〉裡那張跟帝國一樣大的地圖。</p><h3>3 · 把筆記往上層提升</h3><p>做夢可以把筆記提升到最上層,由 harness 在每個 session 開始時預先載入。這一層必須很小:注入的筆記要花 token,一條錯的筆記會帶進每個 session,而指令檔越長,遵循度越低。例如 Claude Code 的 auto memory 只載入 MEMORY.md 的前 200 行或 25 KB,當作索引使用。</p><h3>4 · 讓記憶聚焦在目標上</h3><p>在一個 LAB 收購任務中,多個 agent 同時寫入同一張合約條款表,互相覆蓋,用這份 wiki 寫出的摘要只達成 57 項評分事實中的 41 項(72%)。讓 Claude 反思失敗、改寫建立 wiki 的指令後——每份合約由一個 agent 負責、條款逐字引用——達成 57 項中的 57 項。</p><h3>5 · 補上單一 session 留下的缺口</h3><p>單一 session 只看得到自己的脈絡,做夢則能跨很多個 session 看。對某份 wiki 做第二輪做夢時,它找到 9 個指向不存在頁面的連結,改指向既有的頁面,並新增 3 頁,其中一頁是索引。</p></section><section class="article-section" id="open" data-item="" aria-labelledby="open-h"><h2 id="open-h">還沒解決的問題</h2><ul><li>什麼時候寫記憶:在 session 當下寫,能在源頭抓住重點,但會分散注意力;交給做夢可以移到背景,但產出不會馬上可用。</li><li>怎麼保持最新:做夢能修錯,但要花算力,所以或許該聚焦在容易變動的資訊,或依記憶被讀取的頻率調整做夢的頻率。</li><li>逐字稿搜尋是否該當基礎:wiki 加搜尋效果可以很好,但維護這些記憶形式需要算力,才能避免錯誤累積。</li></ul></section><section class="article-section" id="source" data-item="" aria-labelledby="source-h"><h2 id="source-h">資料來源</h2><ul class="links"><li><a href="https://www.anthropic.com/research/components-of-agent-memory" target="_blank" rel="noopener">Anthropic —〈The components of agent memory〉<span class="material-symbols-rounded" aria-hidden="true">arrow_outward</span></a><span class="links__meta">Lance Martin · 2026/11/6</span></li></ul></section></div></div>
+</main>
+
+  <script src="data/data.js"></script>
+  <script src="assets/shell.js"></script>
+  <script src="assets/app.js"></script>
+<p class="lang-alt-link" style="text-align:center;padding:12px;"><a href="/en/claude-research.html" hreflang="en" rel="alternate" lang="en">English version</a></p>
+</body>
+</html>
