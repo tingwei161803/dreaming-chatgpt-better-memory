@@ -41,7 +41,7 @@
         ? '<p class="page-head__sub">' + esc(t(p.subtitle)) + "</p>" : "";
       var groups = (L.meta && L.meta.groups) || {};
       var eyebrow = p.group && groups[p.group] && p.layout !== "hub"
-        ? '<p class="page-head__eyebrow">' + esc(t(groups[p.group])) + "</p>" : "";
+        ? '<p class="page-head__eyebrow page-head__eyebrow--' + esc(p.group) + '">' + esc(t(groups[p.group])) + "</p>" : "";
       return '<header class="page-head">' + eyebrow + "<h1>" + esc(t(p.title)) + "</h1>" + sub + "</header>";
     }
 
@@ -155,47 +155,96 @@
        ===================================================================== */
     var RENDERERS = {
 
-      /* ---- hub: hero stats + a card linking to every other page ---- */
+      /* ---- hub: night-journal hero + a split ledger of every other page ----
+         hero      the h1 (p.heading) and the lede, then a "night" diagram:
+                   what each kind of dreaming reads by day and writes at night
+         bridge    the featured page (the comparison) spanning both sources
+         ledger    one column per source (OpenAI | Anthropic): two facts, the
+                   chapter list, and a pull quote from that source          */
       hub: function (p) {
-        var stats = (p.stats || []).map(function (s) {
-          return '<div class="hero__stat" data-item>' +
-            '<b class="hero__stat-value" data-count="' + esc(String(s.value)) + '">0</b>' +
-            '<span class="hero__stat-label">' + esc(t(s.label)) + "</span></div>";
+        var groups = (L.meta && L.meta.groups) || {};
+        var night = p.night || {};
+        var cols = night.cols || {};
+
+        var lanes = (night.lanes || []).map(function (ln) {
+          var day = (ln.day || []).map(function (d) {
+            return '<li class="nj-frag">' + esc(t(d)) + "</li>";
+          }).join("");
+          var n = ln.night || {}, m = ln.morning || {};
+          return '<div class="nj-lane nj-lane--' + esc(ln.side) + '">' +
+            '<p class="nj-lane__label">' + esc(t(ln.label)) + "</p>" +
+            '<div class="nj-day"><span class="nj-tag">' + esc(t(cols.day)) + "</span>" +
+              "<ul>" + day + "</ul></div>" +
+            '<div class="nj-sleep"><span class="nj-tag">' + esc(t(cols.night)) + "</span>" +
+              '<span class="nj-sleep__title">' + esc(t(n.title)) + "</span>" +
+              '<span class="nj-sleep__meta">' + esc(t(n.meta)) + "</span></div>" +
+            '<div class="nj-note"><span class="nj-tag">' + esc(t(cols.morning)) + "</span>" +
+              '<p class="nj-note__text">' + esc(t(m.note)) + "</p>" +
+              '<p class="nj-note__sub">' + esc(t(m.sub)) + "</p></div>" +
+          "</div>";
         }).join("");
-        function card(q) {
-          return '<a class="card card--nav" data-item href="' + esc(L.pageHref(q)) + '" ' +
-              'aria-label="' + esc(t(q.title)) + '">' +
-            '<span class="material-symbols-rounded card__icon" aria-hidden="true">' + esc(q.icon || "label") + "</span>" +
-            '<h3 class="card__title">' + esc(t(q.title)) + "</h3>" +
-            '<p class="card__summary">' + esc(t(q.blurb || q.subtitle)) + "</p></a>";
-        }
-        /* featured page (the comparison) gets the big banner, the rest are grouped by source */
+        var nightHtml = lanes
+          ? '<figure class="nj" data-item>' +
+              '<div class="nj__sky" aria-hidden="true"><span class="nj__moon"></span></div>' +
+              '<div class="nj__cols" aria-hidden="true"><span>' + esc(t(cols.day)) + "</span><span>" +
+                esc(t(cols.night)) + "</span><span>" + esc(t(cols.morning)) + "</span></div>" +
+              '<div class="nj__lanes">' + lanes + "</div>" +
+              '<figcaption class="nj__caption">' + esc(t(night.caption)) + "</figcaption>" +
+            "</figure>"
+          : "";
+
+        var hero = '<header class="page-head hub-hero">' +
+            "<h1>" + esc(t(p.heading || p.title)) + "</h1>" +
+            (t(p.subtitle) ? '<p class="page-head__sub">' + esc(t(p.subtitle)) + "</p>" : "") +
+          "</header>";
+
+        /* featured page (the comparison) bridges the two columns */
         var feat = null;
         L.pages.forEach(function (q) { if (q.slug === p.featured) feat = q; });
         var featHtml = feat
-          ? '<a class="feature" data-item href="' + esc(L.pageHref(feat)) + '">' +
-              '<span class="feature__kicker">' + esc(t(p.featuredKicker)) + "</span>" +
-              '<b class="feature__title">' + esc(t(feat.title)) + "</b>" +
-              '<span class="feature__body">' + esc(t(feat.blurb || feat.subtitle)) + "</span>" +
-              '<span class="feature__cta">' + esc(t(p.featuredCta)) +
+          ? '<a class="bridge" data-item href="' + esc(L.pageHref(feat)) + '">' +
+              '<span class="bridge__kicker">' + esc(t(p.featuredKicker)) + "</span>" +
+              '<b class="bridge__title">' + esc(t(feat.title)) + "</b>" +
+              '<span class="bridge__body">' + esc(t(feat.blurb || feat.subtitle)) + "</span>" +
+              '<span class="bridge__cta">' + esc(t(p.featuredCta)) +
                 ' <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></span></a>'
           : "";
-        var groups = (L.meta && L.meta.groups) || {};
+
+        var ledger = p.ledger || {};
         var order = [];
         L.pages.forEach(function (q) {
           if (q.slug === "home" || q === feat) return;
           var g = q.group || "";
           if (order.indexOf(g) === -1) order.push(g);
         });
-        var sectionsHtml = order.map(function (g) {
+        var colsHtml = order.map(function (g) {
+          var info = ledger[g] || {};
           var list = L.pages.filter(function (q) { return q.slug !== "home" && q !== feat && (q.group || "") === g; });
-          return '<section class="hub-group hub-group--' + esc(g) + '">' +
-            (groups[g] ? '<h2 class="hub-group__title">' + esc(t(groups[g])) + "</h2>" : "") +
-            '<div class="grid">' + list.map(card).join("") + "</div></section>";
+          var facts = (info.facts || []).map(function (f) {
+            return '<div class="lg-fact"><b class="lg-fact__value">' + esc(t(f.value)) + "</b>" +
+              '<span class="lg-fact__label">' + esc(t(f.label)) + "</span></div>";
+          }).join("");
+          var rows = list.map(function (q) {
+            return '<li><a class="lg-row" data-item href="' + esc(L.pageHref(q)) + '">' +
+              '<span class="lg-row__title">' + esc(t(q.title)) + "</span>" +
+              '<span class="lg-row__blurb">' + esc(t(q.blurb || q.subtitle)) + "</span></a></li>";
+          }).join("");
+          var quote = info.quote
+            ? '<figure class="lg-quote"><blockquote>' + esc(t(info.quote.text)) + "</blockquote>" +
+                "<figcaption>" + esc(t(info.quote.cite)) + "</figcaption></figure>"
+            : "";
+          return '<section class="lg-col lg-col--' + esc(g) + '" aria-labelledby="lg-' + esc(g) + '">' +
+            '<header class="lg-col__head">' +
+              '<h2 class="lg-col__title" id="lg-' + esc(g) + '">' + esc(t(groups[g] || g)) + "</h2>" +
+              (info.source ? '<p class="lg-col__source">' + esc(t(info.source)) + "</p>" : "") +
+              (info.line ? '<p class="lg-col__line">' + esc(t(info.line)) + "</p>" : "") +
+            "</header>" +
+            (facts ? '<div class="lg-facts">' + facts + "</div>" : "") +
+            '<ol class="lg-list">' + rows + "</ol>" + quote +
+          "</section>";
         }).join("");
-        return head(p) + featHtml +
-          (stats ? '<div class="hero__stats">' + stats + "</div>" : "") +
-          sectionsHtml;
+
+        return hero + nightHtml + featHtml + '<div class="ledger">' + colsHtml + "</div>";
       },
 
       /* ---- gallery: search + chips + card grid + dialog ---- */
@@ -423,7 +472,7 @@
        WIRING (interactions) — keyed by layout, run after innerHTML is set
        ===================================================================== */
     var WIRE = {
-      hub: function () { animateCounters(); },
+      hub: function () { /* static */ },
 
       gallery: function (p) {
         var grid = document.getElementById("grid");
@@ -719,28 +768,6 @@
         teardowns.push(function () { try { map.remove(); } catch (e) {} });
       }
     };
-
-    /* ---- hero count-up (shared by hub) ---- */
-    function animateCounters() {
-      var els = [].slice.call(pageEl.querySelectorAll(".hero__stat-value[data-count]"));
-      if (!els.length) return;
-      function run(el) {
-        var target = parseFloat(el.dataset.count) || 0, dur = 1000, start = null;
-        function step(ts) {
-          if (start === null) start = ts;
-          var pr = Math.min(1, (ts - start) / dur), eased = 1 - Math.pow(1 - pr, 3);
-          el.textContent = String(Math.round(target * eased));
-          if (pr < 1) requestAnimationFrame(step); else el.textContent = String(target);
-        }
-        requestAnimationFrame(step);
-      }
-      if (!("IntersectionObserver" in window)) { els.forEach(run); return; }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } });
-      }, { threshold: 0.4 });
-      els.forEach(function (el) { io.observe(el); });
-      teardowns.push(function () { io.disconnect(); });
-    }
 
     /* =====================================================================
        RENDER the current page
