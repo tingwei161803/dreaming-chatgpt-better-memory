@@ -623,7 +623,7 @@ window.SITE_PAGES = [
             "讀完整份逐字稿——可以分頁讀，但不能讀到一半就停。",
             "拿它驗證記憶既有的說法：沒有證據支持的先別動，互相矛盾的要修，逐字稿顯示當時其實不確定的要降級。",
             "補上精確的識別碼、指令、數值、過時註記，以及繞了遠路才找到正解的過程。",
-            "整理成附 frontmatter(name、description)的小檔,用 [[slug]] 連結相關主題,並維持 _index.md 最新。"
+            "整理成附 frontmatter（name、description）的小檔，用 [[slug]] 連結相關主題，並維持 _index.md 最新。"
           ] } },
         { type: "p", text: {
           en: "Analyzers run at the same time on one shared directory, so the prompt tells them to re-read a file right before editing it, add with targeted edits instead of rewriting, and read every write back to confirm it landed. A last section tells them to work in as few turns as possible, because every turn resends everything they've read.",
