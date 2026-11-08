@@ -311,13 +311,14 @@
   /* =======================================================================
      INIT
      ===================================================================== */
-  /* ---- GitHub star button: live count, no auth, silent on failure ---- */
-  function formatStars(n) {
-    return n >= 1000 ? (Math.round(n / 100) / 10) + "k" : String(n);
-  }
-  /* The count is cached per tab session (one API call, not one per page), and
-     a failed / rate-limited (403) / zero answer is cached too, as "", so the
-     badge simply shows "Star" without a number and we never ask again. */
+  /* ---- GitHub star button: live count, no auth, silent on failure ----
+     The count comes from shields.io's JSON badge endpoint rather than
+     api.github.com: GitHub's unauthenticated API is limited to 60 calls an
+     hour per IP and answers 403 beyond that, which shows up as a console
+     error on every page. shields.io caches the number and always answers.
+     It is cached per tab session too (one request, not one per page), and a
+     zero / unreadable / failed answer is cached as "", so the badge just
+     reads "Star" without a number. */
   function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
   function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* ignore */ } }
   function fetchStars() {
@@ -326,18 +327,20 @@
     var el = document.getElementById("ghStarCount");
     if (!el) return;
     var key = "ghStars:" + repo;
-    function show(n) { el.textContent = n > 0 ? formatStars(n) : ""; }
+    /* "12", "1.2k" … shown as-is; "0" or anything else hides the number */
+    function show(v) { el.textContent = /^[1-9][0-9.]*k?$/.test(v || "") ? v : ""; }
     var cached = ssGet(key);
-    if (cached !== null) { show(parseInt(cached, 10) || 0); return; }
+    if (cached !== null) { show(cached); return; }
     if (!window.fetch) return;
-    fetch("https://api.github.com/repos/" + repo, { headers: { Accept: "application/vnd.github+json" } })
+    fetch("https://img.shields.io/github/stars/" + repo + ".json")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        var n = j && typeof j.stargazers_count === "number" ? j.stargazers_count : 0;
-        ssSet(key, String(n));
-        show(n);
+        var v = j && typeof j.message === "string" ? j.message.trim() : "";
+        if (!/^[1-9][0-9.]*k?$/.test(v)) v = "";
+        ssSet(key, v);
+        show(v);
       })
-      .catch(function () { ssSet(key, "0"); show(0); });
+      .catch(function () { ssSet(key, ""); show(""); });
   }
 
   function init() {
