@@ -65,6 +65,7 @@
     lang:  docLang(),
     theme: lsGet("theme") || systemTheme()
   };
+  document.documentElement.setAttribute("data-theme", state.theme);
 
   /* ---------- helpers shared with app.js ---------- */
   function t(obj) {
@@ -164,7 +165,7 @@
     var footer = document.createElement("footer");
     footer.className = "footer";
     footer.innerHTML = '<p id="footerText"></p>' +
-      '<div class="profile-links" style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:10px">' +
+      '<div class="profile-links">' +
         '<a class="icon-btn" href="https://www.peteraim.com" target="_blank" rel="noopener" title="Home" aria-label="Back to peteraim.com / 返回首頁">' +
           '<span class="material-symbols-rounded">home</span>' +
         '</a>' +
@@ -173,6 +174,15 @@
         '</a>' +
       '</div>';
     main.parentNode.insertBefore(footer, main.nextSibling);
+
+    /* Each page ships a plain "English version / 中文版" link after the scripts
+       so no-JS readers and crawlers can reach the twin page. With JS on, move it
+       into the footer instead of leaving it floating under the page. */
+    var alt = document.querySelector("body > .lang-alt-link");
+    if (alt) {
+      alt.removeAttribute("style");
+      footer.insertBefore(alt, footer.querySelector(".profile-links"));
+    }
 
     /* shared detail dialog (used by card layouts) */
     var dialog = document.createElement("dialog");
@@ -229,6 +239,17 @@
     if (active && inner.scrollWidth > inner.clientWidth) {
       inner.scrollLeft = active.offsetLeft - (inner.clientWidth - active.offsetWidth) / 2;
     }
+    syncNavEdges();
+  }
+  /* mark which ends of the (narrow-screen) nav strip still hide links;
+     CSS fades those edges so the strip reads as scrollable */
+  function syncNavEdges() {
+    var inner = document.getElementById("pageNavInner");
+    var nav = document.getElementById("pageNav");
+    if (!inner || !nav) return;
+    var max = inner.scrollWidth - inner.clientWidth;
+    nav.classList.toggle("pagenav--more-left", max > 2 && inner.scrollLeft > 2);
+    nav.classList.toggle("pagenav--more-right", max > 2 && inner.scrollLeft < max - 2);
   }
 
   /* ---------- chrome text in the active language ---------- */
@@ -254,16 +275,22 @@
   /* =======================================================================
      THEME + LANGUAGE
      ===================================================================== */
-  function applyTheme() {
+  function applyTheme(persist) {
     document.documentElement.setAttribute("data-theme", state.theme);
     var icon = document.getElementById("themeIcon");
     if (icon) icon.textContent = state.theme === "dark" ? "light_mode" : "dark_mode";
-    lsSet("theme", state.theme);
+    var btn = document.getElementById("themeToggle");
+    if (btn) btn.setAttribute("aria-pressed", state.theme === "dark" ? "true" : "false");
+    /* only an explicit choice is remembered; otherwise keep following the OS */
+    if (persist) lsSet("theme", state.theme);
   }
   function wire() {
+    var inner = document.getElementById("pageNavInner");
+    if (inner) inner.addEventListener("scroll", syncNavEdges, { passive: true });
+    window.addEventListener("resize", syncNavEdges);
     document.getElementById("themeToggle").addEventListener("click", function () {
       state.theme = state.theme === "dark" ? "light" : "dark";
-      applyTheme();
+      applyTheme(true);
     });
   }
 
@@ -288,17 +315,29 @@
   function formatStars(n) {
     return n >= 1000 ? (Math.round(n / 100) / 10) + "k" : String(n);
   }
+  /* The count is cached per tab session (one API call, not one per page), and
+     a failed / rate-limited (403) / zero answer is cached too, as "", so the
+     badge simply shows "Star" without a number and we never ask again. */
+  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* ignore */ } }
   function fetchStars() {
     var repo = META.repo;
     if (!repo) return;
     var el = document.getElementById("ghStarCount");
     if (!el) return;
-    fetch("https://api.github.com/repos/" + repo)
+    var key = "ghStars:" + repo;
+    function show(n) { el.textContent = n > 0 ? formatStars(n) : ""; }
+    var cached = ssGet(key);
+    if (cached !== null) { show(parseInt(cached, 10) || 0); return; }
+    if (!window.fetch) return;
+    fetch("https://api.github.com/repos/" + repo, { headers: { Accept: "application/vnd.github+json" } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        if (j && typeof j.stargazers_count === "number") el.textContent = formatStars(j.stargazers_count);
+        var n = j && typeof j.stargazers_count === "number" ? j.stargazers_count : 0;
+        ssSet(key, String(n));
+        show(n);
       })
-      .catch(function () { /* offline / rate-limited: leave the Star button without a count */ });
+      .catch(function () { ssSet(key, "0"); show(0); });
   }
 
   function init() {
