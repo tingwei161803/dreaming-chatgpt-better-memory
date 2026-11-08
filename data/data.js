@@ -57,12 +57,73 @@ window.SITE_PAGES = [
     featured: "compare",
     featuredKicker: { en: "New · side-by-side", zh: "新增 · 逐項對照" },
     featuredCta:    { en: "Read the comparison", zh: "看完整比較" },
-    stats: [
-      { value: 5,   label: { en: "× less compute to serve ChatGPT Free users (approx., OpenAI)",       zh: "× 更省算力，讓 ChatGPT 免費版也能用（約，OpenAI）" } },
-      { value: 3,   label: { en: "jobs of “good memory” OpenAI evaluates",                            zh: "OpenAI 評估「好記憶」的三件事" } },
-      { value: 3,   label: { en: "agent roles in Claude's dream: lead, analyzer, organizer",          zh: "Claude 做夢流程的三種 agent：lead、analyzer、organizer" } },
-      { value: 128, label: { en: "dreaming sessions in Anthropic's wiki eval (score 13% → 48%)",       zh: "Anthropic wiki 評測的做夢 session 數（得分 13% → 48%）" } }
-    ]
+    /* the hub's h1 — `title` above stays the short nav / <title> name */
+    heading:  { en: "While no one is waiting, the AI dreams", zh: "沒人在等的時候，AI 在做夢" },
+
+    /* hero diagram: what each kind of dreaming reads by day and writes by night.
+       Illustrative wording, drawn from the OpenAI announcement's own examples
+       and the Anthropic cookbook's file formats and schedule. */
+    night: {
+      cols: { day:     { en: "By day",  zh: "白天" },
+              night:   { en: "At night", zh: "夜裡" },
+              morning: { en: "Next session", zh: "下一次" } },
+      caption: { en: "Illustration: what each kind of dreaming reads and what it leaves behind — examples from OpenAI's announcement and Anthropic's cookbook.",
+                 zh: "示意：兩種做夢各讀什麼、留下什麼。例子取自 OpenAI 公告與 Anthropic cookbook。" },
+      lanes: [
+        { side: "openai", label: { en: "ChatGPT remembers you", zh: "ChatGPT 記住你" },
+          day: [ { en: "talks about an underwater camera rig", zh: "聊到水下相機組合" },
+                 { en: "mentions being vegetarian",            zh: "提到自己吃素" },
+                 { en: "plans a July trip to Singapore",       zh: "規劃 7 月去新加坡" } ],
+          night: { title: { en: "A background process", zh: "背景程序整理" },
+                   meta:  { en: "how often: not stated", zh: "多久跑一次：公告未說明" } },
+          morning: { note: { en: "You: vegetarian, shoots underwater, Singapore in July.",
+                             zh: "你：吃素，玩水下攝影，7 月要去新加坡。" },
+                     sub:  { en: "after the trip: “went to Singapore in July 2026”",
+                             zh: "行程結束後：「2026 年 7 月去了新加坡」" } } },
+        { side: "claude", label: { en: "Claude remembers for your agent", zh: "Claude 替 agent 記" },
+          day: [ { en: "finished sessions", zh: "已結束的 session" },
+                 { en: ".txt  .jsonl  .log", zh: ".txt  .jsonl  .log" },
+                 { en: "transcripts, one per session", zh: "每個 session 一份逐字稿" } ],
+          night: { title: { en: "Nightly at 1 AM", zh: "每晚 1 點" },
+                   meta:  { en: "lead → analyzers → organizer", zh: "lead → analyzer → organizer" } },
+          morning: { note: { en: "_index.md, [[commands]], [[lessons]]",
+                             zh: "_index.md、[[commands]]、[[lessons]]" },
+                     sub:  { en: "a linked Markdown wiki the agent mounts read-only",
+                             zh: "互相連結的 Markdown wiki，agent 以唯讀方式掛載" } } }
+      ]
+    },
+
+    /* the split ledger under the hero: one column per source */
+    ledger: {
+      openai: {
+        source: { en: "OpenAI announcement, Jun 4 2026", zh: "OpenAI 公告，2026/6/4" },
+        line:   { en: "Dreams about you, the person — automatically, out of sight.",
+                  zh: "記的是你這個人，自動發生，你看不到過程。" },
+        facts: [
+          { value: { en: "~5×", zh: "約 5×" },
+            label: { en: "less compute to serve ChatGPT Free users", zh: "服務 ChatGPT 免費版的算力降低幅度" } },
+          { value: { en: "3 jobs", zh: "3 件事" },
+            label: { en: "that “good memory” must do, as OpenAI evaluates it", zh: "OpenAI 評估「好記憶」時要做好的事" } }
+        ],
+        quote: { text: { en: "The old saved-memories system could feel like talking to someone who took a few notes, but still forgot everything that wasn't written down.",
+                         zh: "舊的「儲存記憶」系統用起來，像在跟一個只記了幾筆筆記、卻把沒寫下來的全忘光的人說話。" },
+                 cite: { en: "OpenAI's announcement", zh: "OpenAI 公告" } }
+      },
+      claude: {
+        source: { en: "Anthropic cookbook and research, Nov 2026", zh: "Anthropic cookbook 與研究文，2026/11" },
+        line:   { en: "Dreams for your agent — assembled, tuned and audited by developers.",
+                  zh: "記的是 agent 學到的事，由開發者組裝、調整、稽核。" },
+        facts: [
+          { value: { en: "3 agents", zh: "3 種 agent" },
+            label: { en: "lead, analyzers and an organizer split the work", zh: "lead、analyzer、organizer 分工合作" } },
+          { value: { en: "13% → 48%", zh: "13% → 48%" },
+            label: { en: "wiki eval score as dreaming grows from 2 to 128 sessions", zh: "wiki 評測得分，做夢從 2 個 session 增加到 128 個" } }
+        ],
+        quote: { text: { en: "Life can only be understood backward, but it must be lived forward.",
+                         zh: "人生只能向後理解，卻必須向前活。" },
+                 cite: { en: "Kierkegaard, as quoted in Anthropic's research post", zh: "齊克果，Anthropic 研究文引用" } }
+      }
+    }
   },
 
   /* ===================================================================== */
